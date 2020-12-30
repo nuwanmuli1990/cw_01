@@ -4,7 +4,7 @@ pipeline {
  	   APP_NAME = "etfbcore3febu"
      BRANCH_NAME = "deployment_fe"
      PORT = "5070"
-   	 IMAGE_TAG = "registry.etf.inova.lk:5000/${PROJECT}/${APP_NAME}:${BRANCH_NAME}.${env.BUILD_NUMBER}"
+   	 IMAGE_TAG = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
                 }
     agent none 
     options {
@@ -19,7 +19,7 @@ pipeline {
      }
             }
          steps {
-            sh "mvn -f __business-units/_all/pom.xml -Dmaven.test.skip=true clean install -X"
+            sh "mvn -f pom.xml -Dmaven.test.skip=true clean install -X"
           }
         }
   	stage('Test') {
@@ -54,12 +54,11 @@ pipeline {
             }
 		    steps{
 					sh 'mkdir -p dockerImage'
-					sh 'cp __business-units/_all/Dockerfile dockerImage/'
-					sh 'cp __business-units/_all/target/_all-v0.1.jar dockerImage/'
+					sh 'cp Dockerfile dockerImage/'
+					sh 'cp target/demo-0.0.1-SNAPSHOT.jar dockerImage/'
 					sh 'docker build --tag=${APP_NAME} dockerImage/.'
 					sh 'docker tag ${APP_NAME} ${IMAGE_TAG}'
-					sh 'docker login -u user1 -p 123 registry.etf.inova.lk:5000'
-					sh 'docker push ${IMAGE_TAG}'
+					
           sh 'docker image rm ${IMAGE_TAG}'
           sh 'docker image rm ${APP_NAME}'
           sh 'rm -rf dockerImage/'          

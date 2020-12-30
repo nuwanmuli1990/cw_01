@@ -1,0 +1,7 @@
+FROM java:8
+WORKDIR /
+RUN echo "Asia/Colombo" | tee /etc/timezone
+RUN dpkg-reconfigure --frontend noninteractive tzdata
+ADD _all-v0.1.jar _all-v0.1.jar
+EXPOSE 5070
+ENTRYPOINT ["java","-jar","_all-v0.1.jar","--spring.profiles.active=dao-dev","--server.servlet.context-path=/bu","--server.port=5070"]
