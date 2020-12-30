@@ -2,7 +2,7 @@ pipeline {
   environment {
    	 PROJECT = "etfbpipeline"
  	   APP_NAME = "etfbcore3febu"
-     BRANCH_NAME = "deployment_fe"
+     BRANCH_NAME = "dev_branch"
      PORT = "5070"
    	 IMAGE_TAG = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
                 }
@@ -19,7 +19,7 @@ pipeline {
      }
             }
          steps {
-            sh "mvn -f pom.xml -Dmaven.test.skip=true clean install -X"
+            sh "mvn -Dmaven.test.skip=true clean install -X"
           }
         }
   	stage('Test') {
@@ -59,8 +59,6 @@ pipeline {
 					sh 'docker build --tag=${APP_NAME} dockerImage/.'
 					sh 'docker tag ${APP_NAME} ${IMAGE_TAG}'
 					
-          sh 'docker image rm ${IMAGE_TAG}'
-          sh 'docker image rm ${APP_NAME}'
           sh 'rm -rf dockerImage/'          
         }
         }
