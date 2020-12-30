@@ -1,7 +1,7 @@
 pipeline {
   environment {
-   	 PROJECT = "etfbpipeline"
- 	   APP_NAME = "etfbcore3febu"
+   	 PROJECT = "pipeline"
+ 	   APP_NAME = "cw"
      BRANCH_NAME = "dev_branch"
      PORT = "5070"
    	 IMAGE_TAG = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
@@ -41,7 +41,7 @@ pipeline {
      }
             }
           steps {
-               sh 'bash ./jenkins/scripts/deliver-allbu.sh'
+               sh 'bash ./jenkins/scripts/runtest.sh'
                sh 'bash ./jenkins/scripts/kill.sh'
          }
         }
@@ -71,9 +71,7 @@ pipeline {
                     }
               steps {
                   sh 'mkdir -p /root/.kube/'
-                  sh 'mkdir -p /etc/kubernetes/pki/'
                   sh 'cp /root/.m2/config /root/.kube/'
-                  sh 'cp /root/.m2/ca.crt /etc/kubernetes/pki/'
                   sh '''cat <<EOF > deployment.yaml
 apiVersion: apps/v1                  
 kind: Deployment
@@ -97,8 +95,6 @@ spec:
         env:
         - name: "PORT"
           value: "${PORT}"
-      imagePullSecrets:
-      - name: registry-secret
 EOF'''
                sh 'kubectl apply -f deployment.yaml'
                sh '''cat <<EOF > service.yaml
@@ -115,23 +111,10 @@ spec:
       port: ${PORT}
       targetPort: ${PORT}
   externalIPs:
-    - 192.168.1.181
+    - 192.168.175.19
 EOF'''
                sh 'kubectl apply -f service.yaml'               
                   }
         }
-            }
-          //  post {
-          //    success {
-          //       mail to: 'pamitha.lakbodha@inovaitsys.com',
-          //                subject: "Success Pipeline: ${currentBuild.fullDisplayName}",
-          //                body: "${env.BRANCH_NAME}/${env.BUILD_NUMBER}"
-            //         }
-          //    failure {
-           //         mail to: 'ravi.aluthge@inovaitsys.com',
-            //          cc: 'pamitha.lakbodha@inovaitsys.com',
-            //              subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
-            //              body: "Something is wrong with ${env.BUILD_URL}"
-             //         }
-           //     } 
+            } 
 }
