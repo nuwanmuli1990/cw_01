@@ -1,120 +1,42 @@
 pipeline {
   environment {
-   	 PROJECT = "pipeline"
- 	   APP_NAME = "cw"
-     BRANCH_NAME = "dev_branch"
-     PORT = "5070"
-   	 IMAGE_TAG = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
+   	 PROJECT = "cw_pipeline"
+ 	 APP_NAME_CW = "cw_01"
+ 	 BRANCH_NAME = "dev_branch"
+   	 IMAGE_TAG_CW = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
                 }
-    agent none 
+    agent any 
     options {
         skipStagesAfterUnstable()
     }
     stages {
-        stage('Build') {
-            agent {
-                docker {
-      image 'maven'
-      args '-v /root/.m2:/root/.m2'
-     }
-            }
+
+        stage('Cw') {
+          stages {
+            stage('Build & Test Cw') {
          steps {
-            sh "mvn -Dmaven.test.skip=true clean install -X"
+            sh "mvn clean install -X"
+            sh 'bash ./jenkins/scripts/runtest.sh'
+            sh 'bash ./jenkins/scripts/kill.sh'
           }
         }
-  	stage('Test') {
-              agent {
-                docker {
-      image 'maven'
-      args '-v /root/.m2:/root/.m2'
-     }
-            }
-            steps {
-                sh 'mvn test'
-            }
-        }
-        stage('Deliver') {
-            agent {
-                docker {
-      image 'maven'
-      args '-v /root/.m2:/root/.m2'
-     }
-            }
-          steps {
-               sh 'bash ./jenkins/scripts/runtest.sh'
-               sh 'bash ./jenkins/scripts/kill.sh'
-         }
-        }
-		stage('Building & Deploy Image') {
-            agent {
-                docker {
-      image 'ravialuthge/gcp:latest'
-      args '-v /root/.m2:/root/.m2'
-     }
-            }
+		stage('Building & Deploy Image Cw') {
 		    steps{
 					sh 'mkdir -p dockerImage'
 					sh 'cp Dockerfile dockerImage/'
 					sh 'cp target/demo-0.0.1-SNAPSHOT.jar dockerImage/'
 					sh 'docker build --tag=${APP_NAME} dockerImage/.'
 					sh 'docker tag ${APP_NAME} ${IMAGE_TAG}'
-					
-          sh 'rm -rf dockerImage/'          
+					sh 'rm -rf dockerImage/'       
         }
         }
-        stage('Deploy cluster') {
-              agent {
-                 docker {
-                       image 'ravialuthge/gcp:latest' 
-                         args '-v /root/.m2:/root/.m2'   
-                        }
-                    }
-              steps {
-                  sh 'mkdir -p /root/.kube/'
-                  sh 'cp /root/.m2/config /root/.kube/'
-                  sh '''cat <<EOF > deployment.yaml
-apiVersion: apps/v1                  
-kind: Deployment
-metadata:
-  name: ${APP_NAME}-deploy
-spec:
-  selector:
-    matchLabels:
-      app: ${APP_NAME}-deploy
-      department: stage
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: ${APP_NAME}-deploy
-        department: stage
-    spec:
-      containers:
-      - name: ${APP_NAME}
-        image: ${IMAGE_TAG}
-        env:
-        - name: "PORT"
-          value: "${PORT}"
-EOF'''
-               sh 'kubectl apply -f deployment.yaml'
-               sh '''cat <<EOF > service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${APP_NAME}-service
-spec:
-  selector:
-    app: ${APP_NAME}-deploy
-  ports:
-    - name: http
-      protocol: TCP
-      port: ${PORT}
-      targetPort: ${PORT}
-  externalIPs:
-    - 192.168.175.19
-EOF'''
-               sh 'kubectl apply -f service.yaml'               
-                  }
+        stage('Deploy cluster Cw') {
+             steps {
+               sh 'kubectl set image deployment/cw_01  cw_01=${IMAGE_TAG_CW}  --record -n staging'
+}
+}
         }
-            } 
+        }
+
+            }
 }
