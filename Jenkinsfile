@@ -1,7 +1,7 @@
 pipeline {
   environment {
-   	 PROJECT = "pipeline"
- 	   APP_NAME = "cw"
+   	 PROJECT = "cw_pipeline"
+ 	   APP_NAME = "cw_s01"
      BRANCH_NAME = "dev_branch"
      PORT = "5070"
    	 IMAGE_TAG = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
@@ -32,16 +32,15 @@ pipeline {
 					sh 'mkdir -p dockerImage'
 					sh 'cp Dockerfile dockerImage/'
 					sh 'cp target/demo-0.0.1-SNAPSHOT.jar dockerImage/'
-					sh 'sudo docker build --tag=${APP_NAME} dockerImage/.'
-					sh 'sudo docker tag ${APP_NAME} ${IMAGE_TAG}'
+					sh 'docker build --tag=${APP_NAME} dockerImage/.'
+					sh 'docker tag ${APP_NAME} ${IMAGE_TAG}'
 					
           sh 'rm -rf dockerImage/'          
         }
         }
         stage('Deploy cluster') {
               steps {
-                  sh 'mkdir -p /root/.kube/'
-                  sh 'cp /root/.m2/config /root/.kube/'
+                  sh 'mkdir -p /var/lib/jenkins/.kube/'
                   sh '''cat <<EOF > deployment.yaml
 apiVersion: apps/v1                  
 kind: Deployment
