@@ -40,8 +40,8 @@ pipeline {
         }
         stage('Deploy cluster') {
               steps {
-                  sh 'sudo mkdir -p /root/.kube/'
-                  sh 'sudo cp /root/.m2/config /root/.kube/'
+                  sh 'mkdir -p /root/.kube/'
+                  sh 'cp /root/.m2/config /root/.kube/'
                   sh '''cat <<EOF > deployment.yaml
 apiVersion: apps/v1                  
 kind: Deployment
