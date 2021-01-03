@@ -32,8 +32,8 @@ pipeline {
 					sh 'mkdir -p dockerImage'
 					sh 'cp Dockerfile dockerImage/'
 					sh 'cp target/demo-0.0.1-SNAPSHOT.jar dockerImage/'
-					sh 'docker build --tag=${APP_NAME} dockerImage/.'
-					sh 'docker tag ${APP_NAME} ${IMAGE_TAG}'
+					sh 'sudo docker build --tag=${APP_NAME} dockerImage/.'
+					sh 'sudo docker tag ${APP_NAME} ${IMAGE_TAG}'
 					
           sh 'rm -rf dockerImage/'          
         }
