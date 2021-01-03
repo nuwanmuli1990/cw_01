@@ -6,7 +6,7 @@ pipeline {
      PORT = "5070"
    	 IMAGE_TAG = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
                 }
-    agent none 
+    agent any 
     options {
         skipStagesAfterUnstable()
     }
