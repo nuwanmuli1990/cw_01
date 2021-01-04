@@ -40,7 +40,7 @@ pipeline {
         }
         stage('Deploy cluster') {
               steps {
-                  sh 'mkdir -p /var/lib/jenkins/.kube/'
+                  //sh 'mkdir -p /var/lib/jenkins/.kube/'
                   sh '''cat <<EOF > deployment.yaml
 apiVersion: apps/v1                  
 kind: Deployment
