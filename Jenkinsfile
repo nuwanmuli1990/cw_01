@@ -1,7 +1,7 @@
 pipeline {
   environment {
-   	 PROJECT = "cw_pipeline"
- 	   APP_NAME = "cw_s01"
+   	 PROJECT = "cwpipeline"
+ 	   APP_NAME = "cws01"
      BRANCH_NAME = "dev_branch"
      PORT = "5070"
    	 IMAGE_TAG = "${PROJECT}/${APP_NAME}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
