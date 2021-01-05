@@ -80,7 +80,7 @@ spec:
       port: ${PORT}
       targetPort: ${PORT}
   externalIPs:
-    - 192.168.175.19
+    - 192.168.175.20
 EOF'''
                sh 'kubectl apply -f service.yaml'               
                   }
